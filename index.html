@@ -48,7 +48,7 @@
     const berros = [-96.9197, 19.5353];
     const map = new maplibregl.Map({
       container: 'map',
-      style: 'https://demotiles.maplibre.org/style.json',
+      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
       center: berros,
       zoom: 13
     });
@@ -136,13 +136,4 @@
             if (reg.active) {
               reg.active.postMessage("update");
               alert("Actualizando rutas…");
-              setTimeout(() => location.reload(), 2000);
-            }
-          });
-        });
-    }
-
-    // Admin
-    let isAdmin = false;
-    document.getElementById("adminLogin").addEventListener("click", () => {
-     
+              setTimeout(()

@@ -49,28 +49,7 @@
     const berros = [-96.9197, 19.5353];
     const map = new maplibregl.Map({
       container: 'map',
-      style: {
-        version: 8,
-        sources: {
-          "osm-tiles": {
-            type: "raster",
-            tiles: [
-              "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-            ],
-            tileSize: 256,
-            attribution: "© OpenStreetMap contributors"
-          }
-        },
-        layers: [
-          {
-            id: "osm-tiles",
-            type: "raster",
-            source: "osm-tiles",
-            minzoom: 0,
-            maxzoom: 19
-          }
-        ]
-      },
+      style: `https://api.maptiler.com/maps/streets/style.json?key=jDjZlkg6FM3H1xsvT5tm`, // 🔹 Pega aquí tu API key
       center: berros,
       zoom: 13
     });
@@ -154,4 +133,16 @@
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./service-worker.js")
         .then(reg => {
-          document.get
+          document.getElementById("updateRoutes").addEventListener("click", () => {
+            if (reg.active) {
+              reg.active.postMessage("update");
+              alert("Actualizando rutas…");
+              setTimeout(() => location.reload(), 2000);
+            }
+          });
+        });
+    }
+
+    // Admin
+    let isAdmin = false;
+    document

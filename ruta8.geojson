@@ -1,2 +1,22 @@
-const routes = [
-  { id: 'ruta8', name: 'Ruta 8: Buena Vista – Berros – CAXA – Trancas – Pradera – C. Abastos', color: '#e11d48', file: 'data/ruta8.geojson' }
+{
+  "type": "FeatureCollection",
+  "name": "ruta8",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Ruta 8" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-96.9108, 19.5565], 
+          [-96.9152, 19.5520], 
+          [-96.9197, 19.5353], 
+          [-96.9270, 19.5225], 
+          [-96.9335, 19.5100], 
+          [-96.9402, 19.5005], 
+          [-96.9450, 19.4930]
+        ]
+      }
+    }
+  ]
+}

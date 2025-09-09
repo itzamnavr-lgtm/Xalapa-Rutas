@@ -10,7 +10,7 @@
   <style>
     html, body, #map { height: 100%; margin: 0; }
     .panel {
-      position: absolute; top: 10px; left: 10px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.15); width: 280px; font-family: system-ui, sans-serif;
+      position: absolute; top: 10px; left: 10px; background: #fff; padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.15); width: 280px; font-family: system-ui, sans-serif; z-index: 2;
     }
     .legend { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
     .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #f4f4f5; cursor: pointer; }
@@ -19,7 +19,7 @@
   </style>
 </head>
 <body>
-  <div id="map"></div>
+  <div id="map" style="z-index:1;"></div>
   <div class="panel">
     <strong>Rutas Xalapa</strong>
     <input id="search" type="text" placeholder="Buscar colonia/avenida/ruta…" style="width:100%; margin-top:8px; padding:6px;" />
@@ -48,7 +48,7 @@
     const berros = [-96.9197, 19.5353];
     const map = new maplibregl.Map({
       container: 'map',
-      style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+      style: 'https://raw.githubusercontent.com/maplibre/demotiles/main/style.json',
       center: berros,
       zoom: 13
     });
@@ -136,4 +136,3 @@
             if (reg.active) {
               reg.active.postMessage("update");
               alert("Actualizando rutas…");
-              setTimeout(()

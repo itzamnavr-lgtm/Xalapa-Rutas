@@ -2,142 +2,41 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Rutas de Camión Xalapa</title>
+  <title>Prueba Mapa Base</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css?v=1.0" rel="stylesheet" />
-  <link rel="manifest" href="./manifest.json?v=1.0">
-  <link rel="icon" type="image/png" href="./icon-192.png?v=1.0">
-  <meta name="theme-color" content="#2563eb">
+  <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
   <style>
-    html, body, #map { height: 100%; margin: 0; }
-    body { -webkit-user-select: text; user-select: text; }
-    .panel {
-      position: absolute; top: 10px; left: 10px; background: #fff; padding: 10px; border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.15); width: 280px; font-family: system-ui, sans-serif; z-index: 2;
-    }
-    .legend { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
-    .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: #f4f4f5; cursor: pointer; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    button { font-family: inherit; cursor: pointer; }
+    html, body { height: 100%; margin: 0; }
+    #map { height: 100%; width: 100%; }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <div class="panel">
-    <strong>Rutas Xalapa</strong>
-    <label for="search" style="display:none;">Buscar ruta</label>
-    <input id="search" name="search" type="text" placeholder="Buscar colonia/avenida/ruta…" />
-    <div class="legend" id="legend"></div>
-    <button id="nearby">📍 Rutas cerca de mí</button>
-    <button id="updateRoutes" style="background:#2563eb; color:white; border:none; padding:6px 10px; border-radius:4px;">
-      🔄 Actualizar rutas
-    </button>
-    <button id="adminLogin" style="background:#f59e0b; color:white; border:none; padding:6px 10px; border-radius:4px;">
-      🔐 Admin
-    </button>
-    <div id="adminPanel" style="display:none; margin-top:10px; padding:8px; border:1px solid #ddd; border-radius:6px; background:#fafafa;">
-      <h4>Agregar nueva ruta</h4>
-      <label for="routeName" style="display:none;">Nombre de la ruta</label>
-      <input type="text" id="routeName" placeholder="Nombre de la ruta" />
-      <label for="routeColor" style="display:none;">Color de la ruta</label>
-      <input type="color" id="routeColor" value="#10b981" />
-      <label for="routeFile" style="display:none;">Archivo GeoJSON</label>
-      <input type="file" id="routeFile" accept=".geojson" />
-      <button id="saveRoute" style="background:#10b981; color:white; border:none; padding:6px 10px; border-radius:4px;">
-        ➕ Guardar ruta
-      </button>
-    </div>
-    <div id="info" style="margin-top:8px; font-size: 0.9rem; color:#444;"></div>
-  </div>
 
-  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js?v=1.0"></script>
+  <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
   <script>
-    const key = "jDjZlkg6FM3H1xsvT5tm"; // API key MapTiler
-    const berros = [-96.9197, 19.5353];
+    const key = "jDjZlkg6FM3H1xsvT5tm"; // Tu API key de MapTiler
 
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: `https://api.maptiler.com/maps/streets/style.json?key=${key}`,
-      center: berros,
-      zoom: 13,
-      transformRequest: (url) => {
-        if (url.startsWith("https://api.maptiler.com/")) {
-          return { url: `${url}${url.includes("?") ? "&" : "?"}key=${key}` };
-        }
-        return { url };
-      }
-    });
-
-    map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
-
-    const routes = [
-      { id: 'ruta8', name: 'Ruta 8: Buena Vista – Berros – CAXA – Trancas – Pradera – C. Abastos', color: '#e11d48', file: 'data/ruta8.geojson?v=1.0' },
-      { id: 'ruta20', name: 'Ruta 20: Murillo Vidal – Plaza Américas – Torre Ánimas – SEV – Coapexpan', color: '#2563eb', file: 'data/ruta20.geojson?v=1.0' }
-    ];
-    const state = { visible: new Set(routes.map(r => r.id)) };
-
-    function addLegend() {
-      const legend = document.getElementById('legend');
-      routes.forEach(r => {
-        const chip = document.createElement('div');
-        chip.className = 'chip';
-        chip.dataset.id = r.id;
-        chip.innerHTML = '<span class="dot" style="background:'+r.color+'"></span><span>'+r.name.split(':')[0]+'</span>';
-        chip.onclick = () => toggleRoute(r.id);
-        legend.appendChild(chip);
-      });
-    }
-
-    function toggleRoute(id) {
-      const visibility = map.getLayoutProperty(id, 'visibility') === 'none' ? 'visible' : 'none';
-      map.setLayoutProperty(id, 'visibility', visibility);
-      map.setLayoutProperty(id + '-casing', 'visibility', visibility);
-      if (visibility === 'visible') state.visible.add(id); else state.visible.delete(id);
-    }
-
-    function fitVisibleBounds() {
-      const bounds = new maplibregl.LngLatBounds();
-      let hasAny = false;
-      routes.forEach(r => {
-        const s = map.getSource(r.id);
-        if (!s) return;
-        const data = s._data || s._options?.data;
-        if (!data || !data.features) return;
-        if (!state.visible.has(r.id)) return;
-        data.features.forEach(f => {
-          (f.geometry.coordinates.flat(2)).forEach(([lng, lat]) => bounds.extend([lng, lat]));
-        });
-        hasAny = true;
-      });
-      if (hasAny) map.fitBounds(bounds, { padding: 60, duration: 600 });
-    }
-
-    map.on('load', async () => {
-      addLegend();
-      for (const r of routes) {
-        const res = await fetch(r.file);
-        const geo = await res.json();
-        map.addSource(r.id, { type: 'geojson', data: geo });
-        map.addLayer({ id: r.id + '-casing', type: 'line', source: r.id, paint: { 'line-color': '#111827', 'line-width': 6, 'line-opacity': 0.2 } });
-        map.addLayer({ id: r.id, type: 'line', source: r.id, paint: { 'line-color': r.color, 'line-width': 3.5 } });
-      }
-      fitVisibleBounds();
-    });
-
-    document.getElementById('search').addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase();
-      routes.forEach(r => {
-        const match = r.name.toLowerCase().includes(q) || r.id.includes(q);
-        const visibility = match ? 'visible' : 'none';
-        if (map.getLayer(r.id)) {
-          map.setLayoutProperty(r.id, 'visibility', visibility);
-          map.setLayoutProperty(r.id + '-casing', 'visibility', visibility);
-          if (match) state.visible.add(r.id); else state.visible.delete(r.id);
+    window.addEventListener('DOMContentLoaded', () => {
+      const map = new maplibregl.Map({
+        container: 'map',
+        style: `https://api.maptiler.com/maps/streets/style.json?key=${key}`,
+        center: [-96.9197, 19.5353], // Centro en Xalapa
+        zoom: 13,
+        transformRequest: (url) => {
+          if (url.includes("maptiler.com")) {
+            return { url: `${url}${url.includes("?") ? "&" : "?"}key=${key}` };
+          }
+          return { url };
         }
       });
-      fitVisibleBounds();
-      document.getElementById('info').textContent = q ? 'Filtrando por: "'+q+'"' : '';
-    });
 
-    document.getElementById('nearby').addEventListener('click', () => {
-      if (!navigator.ge
+      map.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+      map.on('load', () => {
+        console.log("Mapa cargado correctamente");
+      });
+    });
+  </script>
+</body>
+</html>

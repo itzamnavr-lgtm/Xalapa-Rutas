@@ -1,0 +1,2 @@
+const routes = [
+  { id: 'ruta8', name: 'Ruta 8: Buena Vista – Berros – CAXA – Trancas – Pradera – C. Abastos', color: '#e11d48', file: 'data/ruta8.geojson' }

@@ -46,13 +46,22 @@
 
   <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
   <script>
+    const key = "jDjZlkg6FM3H1xsvT5tm"; // Tu API key de MapTiler
     const berros = [-96.9197, 19.5353];
+
     const map = new maplibregl.Map({
       container: 'map',
-      style: `https://api.maptiler.com/maps/streets/style.json?key=jDjZlkg6FM3H1xsvT5tm`, // 🔹 Pega aquí tu API key
+      style: `https://api.maptiler.com/maps/streets/style.json?key=${key}`,
       center: berros,
-      zoom: 13
+      zoom: 13,
+      transformRequest: (url, resourceType) => {
+        if (url.startsWith("https://api.maptiler.com/")) {
+          return { url: `${url}${url.includes("?") ? "&" : "?"}key=${key}` };
+        }
+        return { url };
+      }
     });
+
     map.addControl(new maplibregl.NavigationControl(), 'bottom-right');
 
     const routes = [
@@ -72,12 +81,14 @@
         legend.appendChild(chip);
       });
     }
+
     function toggleRoute(id) {
       const visibility = map.getLayoutProperty(id, 'visibility') === 'none' ? 'visible' : 'none';
       map.setLayoutProperty(id, 'visibility', visibility);
       map.setLayoutProperty(id + '-casing', 'visibility', visibility);
       if (visibility === 'visible') state.visible.add(id); else state.visible.delete(id);
     }
+
     function fitVisibleBounds() {
       const bounds = new maplibregl.LngLatBounds();
       let hasAny = false;
@@ -94,6 +105,7 @@
       });
       if (hasAny) map.fitBounds(bounds, { padding: 60, duration: 600 });
     }
+
     map.on('load', async () => {
       addLegend();
       for (const r of routes) {
@@ -105,6 +117,7 @@
       }
       fitVisibleBounds();
     });
+
     document.getElementById('search').addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase();
       routes.forEach(r => {
@@ -119,6 +132,7 @@
       fitVisibleBounds();
       document.getElementById('info').textContent = q ? 'Filtrando por: "'+q+'"' : '';
     });
+
     document.getElementById('nearby').addEventListener('click', () => {
       if (!navigator.geolocation) return alert('Geolocalización no disponible');
       navigator.geolocation.getCurrentPosition(pos => {
@@ -133,16 +147,4 @@
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("./service-worker.js")
         .then(reg => {
-          document.getElementById("updateRoutes").addEventListener("click", () => {
-            if (reg.active) {
-              reg.active.postMessage("update");
-              alert("Actualizando rutas…");
-              setTimeout(() => location.reload(), 2000);
-            }
-          });
-        });
-    }
-
-    // Admin
-    let isAdmin = false;
-    document
+          document.getElementById("updateRoutes").add
